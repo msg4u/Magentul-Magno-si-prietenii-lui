@@ -1,0 +1,6 @@
+{
+  "name": "Magno - Magnetul și Prietenii de Fier",
+  "description": "Aplicație educativă interactivă bazată pe povestea lui Magno: poveste ilustrată, laborator de predicție și sortare a magnetismului, și experimentul forței prin materiale.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
