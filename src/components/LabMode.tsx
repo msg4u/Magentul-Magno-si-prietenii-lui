@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { TEST_OBJECTS } from '../data/objectsData';
 import { TestObject, TestResultState } from '../types';
 import { MagnoCharacter } from './MagnoCharacter';
 import { ObjectIllustration } from './ObjectIllustration';
+import { ListenButton } from './ListenButton';
 import { 
   playZacSound, 
   playDullSound, 
   playCelebrationSound, 
   playPopSound, 
-  playBoingSound 
+  playBoingSound,
+  preloadStoryVoices
 } from '../utils/audio';
 import { 
   Sparkles, 
@@ -48,6 +50,19 @@ export const LabMode: React.FC<LabModeProps> = ({ onOpenWorksheet }) => {
   const [selectedInfoObject, setSelectedInfoObject] = useState<TestObject | null>(null);
 
   const currentObject = TEST_OBJECTS[currentTestIndex];
+
+  // Preload object hints and science explanations for instantaneous playback
+  useEffect(() => {
+    const labTexts = [
+      "Pasul 1: Ghicește ce va sări spre Magno! Înainte de a apropia magnetul, privește fiecare lucru și ghicește: crezi că face ZAC și sare spre el, sau stă pe loc? Apasă pe butonul roz dacă crezi că este prieten cu Magno, sau pe cel albastru dacă nu este!",
+      ...TEST_OBJECTS.flatMap(o => [
+        `${o.name}. ${o.childHint}`,
+        `De ce s-a întâmplat așa? ${o.scienceExplanation}`,
+        `${o.name}. Material: ${o.material}. ${o.scienceExplanation}`
+      ])
+    ];
+    preloadStoryVoices(labTexts);
+  }, []);
 
   // Set prediction for an object
   const handleSetPrediction = (objectId: string, prediction: 'prieten' | 'nu_prieten') => {
@@ -221,9 +236,18 @@ export const LabMode: React.FC<LabModeProps> = ({ onOpenWorksheet }) => {
                 🤔
               </div>
               <div>
-                <h3 className="text-2xl font-bold font-display text-slate-900">
-                  Pasul 1: Ghicește ce va sări spre Magno!
-                </h3>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-2xl font-bold font-display text-slate-900">
+                    Pasul 1: Ghicește ce va sări spre Magno!
+                  </h3>
+                  <ListenButton
+                    id="listen-step1-instructions"
+                    text="Pasul 1: Ghicește ce va sări spre Magno! Înainte de a apropia magnetul, privește fiecare lucru și ghicește: crezi că face ZAC și sare spre el, sau stă pe loc? Apasă pe butonul roz dacă crezi că este prieten cu Magno, sau pe cel albastru dacă nu este!"
+                    size="sm"
+                    variant="badge"
+                    label="Ascultă instrucțiunile 🗣️"
+                  />
+                </div>
                 <p className="text-xs sm:text-sm text-slate-600 font-medium">
                   Apasă pe butonul roz dacă crezi că face <strong>ZAC!</strong> sau pe cel albastru dacă crezi că stă pe loc.
                 </p>
@@ -360,9 +384,18 @@ export const LabMode: React.FC<LabModeProps> = ({ onOpenWorksheet }) => {
               <span className="inline-block text-xs font-extrabold uppercase tracking-wider text-rose-700 bg-rose-100 px-3 py-1 rounded-full border border-rose-300">
                 🔬 Pasul 2: Testarea cu Magno
               </span>
-              <h3 className="text-2xl sm:text-3xl font-bold font-display text-slate-900 mt-1">
-                Obiectul {currentTestIndex + 1} din {TEST_OBJECTS.length}: {currentObject.name}
-              </h3>
+              <div className="flex flex-wrap items-center gap-3 mt-1">
+                <h3 className="text-2xl sm:text-3xl font-bold font-display text-slate-900">
+                  Obiectul {currentTestIndex + 1} din {TEST_OBJECTS.length}: {currentObject.name}
+                </h3>
+                <ListenButton
+                  id={`listen-obj-${currentObject.id}`}
+                  text={`${currentObject.name}. ${currentObject.childHint}`}
+                  size="sm"
+                  variant="badge"
+                  label="Ascultă indiciul 🗣️"
+                />
+              </div>
             </div>
 
             {/* Stepper Dots */}
@@ -544,16 +577,25 @@ export const LabMode: React.FC<LabModeProps> = ({ onOpenWorksheet }) => {
           </div>
 
           {/* Scientific Explanation for Kids */}
-          <div className="p-4 bg-sky-50 border-2 border-sky-300 rounded-3xl flex items-start gap-3 shadow-xs">
-            <div className="w-9 h-9 rounded-xl bg-sky-500 text-white flex items-center justify-center flex-shrink-0 text-lg font-bold shadow-xs">
-              🔍
+          <div className="p-4 bg-sky-50 border-2 border-sky-300 rounded-3xl flex items-start justify-between gap-3 shadow-xs">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-500 text-white flex items-center justify-center flex-shrink-0 text-lg font-bold shadow-xs">
+                🔍
+              </div>
+              <div className="text-xs sm:text-sm text-slate-700 font-medium">
+                <strong className="font-display font-bold text-slate-900 block text-sm">
+                  De ce s-a întâmplat așa?
+                </strong>
+                {currentObject.scienceExplanation}
+              </div>
             </div>
-            <div className="text-xs sm:text-sm text-slate-700 font-medium">
-              <strong className="font-display font-bold text-slate-900 block text-sm">
-                De ce s-a întâmplat așa?
-              </strong>
-              {currentObject.scienceExplanation}
-            </div>
+            <ListenButton
+              id={`listen-explanation-${currentObject.id}`}
+              text={`De ce s-a întâmplat așa? ${currentObject.scienceExplanation}`}
+              size="sm"
+              variant="icon"
+              tooltip="Ascultă explicația științifică"
+            />
           </div>
         </div>
       )}
@@ -573,6 +615,15 @@ export const LabMode: React.FC<LabModeProps> = ({ onOpenWorksheet }) => {
             <h3 className="text-2xl sm:text-4xl font-extrabold font-display text-slate-900">
               Felicitări, Mare Cercetător Magnetic!
             </h3>
+            <div className="flex justify-center my-1">
+              <ListenButton
+                id="listen-celebration-step3"
+                text="Felicitări, mare cercetător magnetic! Ai explorat toate lucrușoarele și le-ai așezat în cele două cutii ale lui Magno. Secretul descoperit: Doar fierul și oțelul sunt prietenii de fier ai lui Magno!"
+                size="md"
+                variant="pill"
+                label="Ascultă felicitarea cu voce caldă 🗣️"
+              />
+            </div>
             <p className="text-slate-700 text-sm sm:text-base font-medium">
               Ai explorat toate lucrușoarele și le-ai așezat în cele două cutii ale lui Magno!
               <br />
@@ -763,8 +814,15 @@ export const LabMode: React.FC<LabModeProps> = ({ onOpenWorksheet }) => {
                   ? 'bg-rose-50 border-rose-200 text-rose-950'
                   : 'bg-sky-50 border-sky-200 text-sky-950'
               }`}>
-                <div className="flex items-center gap-2 font-display font-bold text-sm mb-1">
+                <div className="flex items-center justify-between gap-2 font-display font-bold text-sm mb-1">
                   <span>{selectedInfoObject.isMagnetic ? '🧲 Prieten Adevărat de Fier!' : '❌ Nu este atras'}</span>
+                  <ListenButton
+                    id={`listen-modal-${selectedInfoObject.id}`}
+                    text={`${selectedInfoObject.name}. Material: ${selectedInfoObject.material}. ${selectedInfoObject.scienceExplanation}`}
+                    size="xs"
+                    variant="badge"
+                    label="Ascultă explicația 🗣️"
+                  />
                 </div>
                 <p className="text-xs sm:text-sm font-medium leading-relaxed">
                   {selectedInfoObject.scienceExplanation}

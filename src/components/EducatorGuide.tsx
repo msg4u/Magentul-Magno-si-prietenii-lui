@@ -1,4 +1,5 @@
 import React from 'react';
+import { ListenButton } from './ListenButton';
 import { 
   HelpCircle, 
   ShieldAlert, 
@@ -26,9 +27,18 @@ export const EducatorGuide: React.FC<EducatorGuideProps> = ({ onOpenWorksheet })
             Pentru Părinți, Educatori și Învățători
           </span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-bold font-display text-slate-900">
-          Cum transformi povestea lui Magno într-un experiment real acasă sau la grădiniță
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-2xl sm:text-3xl font-bold font-display text-slate-900">
+            Cum transformi povestea lui Magno într-un experiment real acasă sau la grădiniță
+          </h2>
+          <ListenButton
+            id="listen-educator-guide"
+            text="Ghid pedagogic pentru părinți și educatori: Cum transformi povestea lui Magno într-un experiment real. Această activitate îmbină lectura cu metoda științifică autentică: formularea ipotezei, experimentul fizic, observarea și clasificarea rezultatelor în cele două cutii."
+            size="sm"
+            variant="pill"
+            label="Ascultă ghidul 🗣️"
+          />
+        </div>
         <p className="text-slate-600 text-sm mt-2">
           Această activitate îmbină lectura cu metoda științifică autentică: formularea ipotezei (predicția), experimentul fizic, observarea și clasificarea rezultatelor.
         </p>
@@ -45,19 +55,28 @@ export const EducatorGuide: React.FC<EducatorGuideProps> = ({ onOpenWorksheet })
       </div>
 
       {/* Safety Alert (Sfat practic din cerință) */}
-      <div className="bg-rose-50 border-2 border-rose-300 rounded-3xl p-5 sm:p-6 shadow-xs flex items-start gap-4">
-        <div className="p-2.5 bg-rose-100 rounded-2xl text-rose-700 flex-shrink-0">
-          <ShieldAlert className="w-6 h-6" />
+      <div className="bg-rose-50 border-2 border-rose-300 rounded-3xl p-5 sm:p-6 shadow-xs flex items-start justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <div className="p-2.5 bg-rose-100 rounded-2xl text-rose-700 flex-shrink-0">
+            <ShieldAlert className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h4 className="font-bold font-display text-rose-950 text-base">
+              Sfat Practic & Siguranță cu Magneții
+            </h4>
+            <p className="text-xs sm:text-sm text-rose-900 leading-relaxed">
+              <strong>Evitați magneții foarte mici sau extrem de puternici de tip neodim</strong> la copiii sub 6 ani fără supraveghere strictă — pot fi periculoși dacă sunt înghițiți.
+              Un <strong>magnet mare de frigider</strong>, un magnet școlar tip bară sau o potcoavă din plastic cu poli protejați este perfect și complet sigur pentru această activitate!
+            </p>
+          </div>
         </div>
-        <div className="space-y-1">
-          <h4 className="font-bold font-display text-rose-950 text-base">
-            Sfat Practic & Siguranță cu Magneții
-          </h4>
-          <p className="text-xs sm:text-sm text-rose-900 leading-relaxed">
-            <strong>Evitați magneții foarte mici sau extrem de puternici de tip neodim</strong> la copiii sub 6 ani fără supraveghere strictă — pot fi periculoși dacă sunt înghițiți.
-            Un <strong>magnet mare de frigider</strong>, un magnet școlar tip bară sau o potcoavă din plastic cu poli protejați este perfect și complet sigur pentru această activitate!
-          </p>
-        </div>
+        <ListenButton
+          id="listen-educator-safety"
+          text="Sfat practic și siguranță cu magneții: Evitați magneții foarte mici sau extrem de puternici de tip neodim la copiii sub 6 ani fără supraveghere strictă. Un magnet mare de frigider, un magnet școlar tip bară sau o potcoavă din plastic cu poli protejați este perfect și complet sigur pentru această activitate!"
+          size="sm"
+          variant="icon"
+          tooltip="Ascultă sfatul de siguranță"
+        />
       </div>
 
       {/* Concept Connection (Legătura poveste-concept) */}

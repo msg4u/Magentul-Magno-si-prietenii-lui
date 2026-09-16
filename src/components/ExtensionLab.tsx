@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { BARRIER_MATERIALS } from '../data/objectsData';
 import { MagnoCharacter } from './MagnoCharacter';
 import { ObjectIllustration } from './ObjectIllustration';
-import { playZacSound, playPopSound } from '../utils/audio';
+import { ListenButton } from './ListenButton';
+import { playZacSound, playPopSound, preloadStoryVoices } from '../utils/audio';
 import { Sparkles, MoveHorizontal, HelpCircle } from 'lucide-react';
 
 export const ExtensionLab: React.FC = () => {
@@ -12,6 +13,13 @@ export const ExtensionLab: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
 
   const barrier = BARRIER_MATERIALS.find(b => b.id === selectedBarrierId) || BARRIER_MATERIALS[0];
+
+  const headerText = "Trece puterea lui Magno prin materiale? În poveste, Magno atrăgea obiectele prin aer. Dar ce se întâmplă dacă punem o barieră precum hârtia, apa, lemnul sau mânuța ta? Glisează magnetul pe dedesubt și privește cum dansează agrafa de fier de deasupra!";
+  const lessonText = "Ce învățăm din acest experiment? Câmpul magnetic este invizibil și călătorește prin spațiu chiar dacă există materiale nemagnetice la mijloc, cum ar fi hârtia, plasticul, lemnul, sticla sau apa. Doar dacă bariera este foarte groasă sau făcută dintr-un strat gros de fier forța va fi deviată.";
+
+  useEffect(() => {
+    preloadStoryVoices([headerText, lessonText]);
+  }, [headerText, lessonText]);
 
   const handleBarrierChange = (id: string) => {
     playPopSound();
@@ -38,9 +46,18 @@ export const ExtensionLab: React.FC = () => {
             Forța Invizibilă a Magnetismului ✨
           </span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900">
-          Trece puterea lui Magno prin materiale? 🪄
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900">
+            Trece puterea lui Magno prin materiale? 🪄
+          </h2>
+          <ListenButton
+            id="listen-extension-intro"
+            text={headerText}
+            size="sm"
+            variant="pill"
+            label="Ascultă introducerea 🗣️"
+          />
+        </div>
         <p className="text-slate-700 text-sm sm:text-base mt-2 font-medium">
           În poveste, Magno atrăgea obiectele prin aer. Dar ce se întâmplă dacă punem o barieră (hârtie, apă, lemn sau chiar mânuța ta) între Magno și agrafă?
           <br />
@@ -193,18 +210,27 @@ export const ExtensionLab: React.FC = () => {
         </div>
 
         {/* Scientific Explanation in Child-Friendly Language */}
-        <div className="p-4 bg-sky-50 border-2 border-sky-300 rounded-3xl flex items-start gap-3.5 shadow-xs">
-          <div className="w-10 h-10 rounded-2xl bg-sky-500 text-white flex items-center justify-center flex-shrink-0 text-xl font-bold shadow-xs">
-            💡
+        <div className="p-4 bg-sky-50 border-2 border-sky-300 rounded-3xl flex items-start justify-between gap-3.5 shadow-xs">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-sky-500 text-white flex items-center justify-center flex-shrink-0 text-xl font-bold shadow-xs">
+              💡
+            </div>
+            <div>
+              <h4 className="font-display font-bold text-base text-sky-950">
+                Ce învățăm din acest experiment?
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-700 mt-1 font-medium leading-relaxed">
+                Câmpul magnetic este invizibil și călătorește prin spațiu chiar dacă există materiale nemagnetice la mijloc (hârtie, plastic, lemn, sticlă sau apă). Doar dacă bariera este foarte groasă sau făcută dintr-un strat gros de fier forța va fi deviată.
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="font-display font-bold text-base text-sky-950">
-              Ce învățăm din acest experiment?
-            </h4>
-            <p className="text-xs sm:text-sm text-slate-700 mt-1 font-medium leading-relaxed">
-              Câmpul magnetic este invizibil și călătorește prin spațiu chiar dacă există materiale nemagnetice la mijloc (hârtie, plastic, lemn, sticlă sau apă). Doar dacă bariera este foarte groasă sau făcută dintr-un strat gros de fier forța va fi deviată.
-            </p>
-          </div>
+          <ListenButton
+            id="listen-extension-lesson"
+            text={lessonText}
+            size="sm"
+            variant="icon"
+            tooltip="Ascultă concluzia experimentului"
+          />
         </div>
       </div>
     </div>

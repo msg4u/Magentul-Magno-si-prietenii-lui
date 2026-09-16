@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { STORY_SCENES } from '../data/storyData';
 import { MagnoCharacter } from './MagnoCharacter';
 import { ObjectIllustration } from './ObjectIllustration';
+import { ListenButton } from './ListenButton';
 import { 
   playZacSound, 
   playDullSound, 
   playPopSound, 
   playBoingSound, 
   speakRomanian, 
-  stopSpeaking 
+  stopSpeaking,
+  preloadStoryVoices,
+  subscribeToVoiceState
 } from '../utils/audio';
 import { 
   Volume2, 
@@ -33,6 +36,25 @@ export const StoryMode: React.FC<StoryModeProps> = ({ onStartActivity }) => {
   const [interactionState, setInteractionState] = useState<'idle' | 'testing' | 'snapped' | 'failed'>('idle');
 
   const scene = STORY_SCENES[currentSceneIndex];
+  const fullSceneText = `${scene.title}. ${scene.paragraph1} ${scene.paragraph2 || ''} ${scene.quote || ''}`;
+
+  // Preload all story narrations on mount so they play with 0ms delay!
+  useEffect(() => {
+    const allTextsToPreload = STORY_SCENES.flatMap(s => [
+      `${s.title}. ${s.paragraph1} ${s.paragraph2 || ''} ${s.quote || ''}`,
+      `${s.paragraph1} ${s.paragraph2 || ''}`,
+      s.quote || '',
+      `Secretul științific al lui Magno: ${s.keyTakeaway}`
+    ]).filter(Boolean);
+
+    preloadStoryVoices(allTextsToPreload);
+
+    const unsubscribe = subscribeToVoiceState((activeText) => {
+      setIsSpeaking(Boolean(activeText));
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleNext = () => {
     stopSpeaking();
@@ -182,13 +204,22 @@ export const StoryMode: React.FC<StoryModeProps> = ({ onStartActivity }) => {
             className="space-y-6"
           >
             {/* Scene Header */}
-            <div>
-              <div className="inline-flex items-center gap-1.5 bg-rose-100 border border-rose-300 text-rose-700 font-display font-extrabold text-xs px-3 py-1 rounded-full mb-2">
-                <span>⭐ Capitolul {scene.id}: Aventură în sertar</span>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="inline-flex items-center gap-1.5 bg-rose-100 border border-rose-300 text-rose-700 font-display font-extrabold text-xs px-3 py-1 rounded-full mb-2">
+                  <span>⭐ Capitolul {scene.id}: Aventură în sertar</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold font-display text-slate-900 leading-snug">
+                  {scene.title}
+                </h3>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-bold font-display text-slate-900 leading-snug">
-                {scene.title}
-              </h3>
+              <ListenButton
+                id={`listen-full-scene-${scene.id}`}
+                text={`${scene.title}. ${scene.paragraph1} ${scene.paragraph2 ? ' ' + scene.paragraph2 : ''} ${scene.quote ? ' ' + scene.quote : ''}`.trim()}
+                size="md"
+                variant="pill"
+                label="Citește-mi toată scena 🗣️"
+              />
             </div>
 
             {/* Interactive Visual Stage with Cartoon Backdrop */}
@@ -363,34 +394,62 @@ export const StoryMode: React.FC<StoryModeProps> = ({ onStartActivity }) => {
             </div>
 
             {/* Story Paragraphs - Big, clear, readable text */}
-            <div className="space-y-4 text-slate-800 text-base sm:text-lg leading-relaxed font-medium bg-amber-50/40 p-4 rounded-2xl border border-amber-100">
-              <p>{scene.paragraph1}</p>
-              {scene.paragraph2 && <p>{scene.paragraph2}</p>}
+            <div className="bg-amber-50/50 p-5 rounded-3xl border-2 border-amber-200/80 space-y-3 relative">
+              <div className="flex items-center justify-between gap-2 pb-1 border-b border-amber-200/60">
+                <span className="text-xs font-display font-extrabold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <span>📖 Textul Poveștii</span>
+                </span>
+                <ListenButton 
+                  id={`listen-para-${scene.id}`}
+                  text={`${scene.paragraph1} ${scene.paragraph2 || ''}`} 
+                  label="Ascultă fragmentul" 
+                  size="sm"
+                  variant="badge"
+                />
+              </div>
+              <p className="text-slate-800 text-base sm:text-lg leading-relaxed font-medium">{scene.paragraph1}</p>
+              {scene.paragraph2 && <p className="text-slate-800 text-base sm:text-lg leading-relaxed font-medium">{scene.paragraph2}</p>}
             </div>
 
             {/* Dialogue / Quote in cute comic speech bubble */}
             {scene.quote && (
-              <div className="relative p-4 bg-amber-100/80 border-2 border-amber-300 rounded-3xl text-amber-950 font-display font-bold text-base sm:text-lg shadow-xs flex items-center gap-3">
-                <span className="text-3xl">💬</span>
-                <div>
+              <div className="relative p-4 bg-amber-100/90 border-2 border-amber-300 rounded-3xl text-amber-950 font-display font-bold text-base sm:text-lg shadow-xs flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl flex-shrink-0">💬</span>
                   <p className="italic">{scene.quote}</p>
                 </div>
+                <ListenButton
+                  id={`listen-quote-${scene.id}`}
+                  text={scene.quote}
+                  size="sm"
+                  variant="icon"
+                  tooltip="Ascultă replica lui Magno"
+                />
               </div>
             )}
 
             {/* Key takeaway secret card */}
-            <div className="flex items-start gap-3 p-4 bg-sky-100/90 border-2 border-sky-300 rounded-3xl text-sky-950 text-sm sm:text-base shadow-xs">
-              <div className="w-10 h-10 rounded-2xl bg-sky-500 text-white flex items-center justify-center flex-shrink-0 text-xl font-bold shadow-xs">
-                💡
+            <div className="flex items-start justify-between gap-3 p-4 bg-sky-100/90 border-2 border-sky-300 rounded-3xl text-sky-950 text-sm sm:text-base shadow-xs">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-sky-500 text-white flex items-center justify-center flex-shrink-0 text-xl font-bold shadow-xs">
+                  💡
+                </div>
+                <div>
+                  <strong className="font-display font-bold block text-sky-900 text-base">
+                    Secretul științific al lui Magno:
+                  </strong>
+                  <span className="font-medium text-slate-700">
+                    {scene.keyTakeaway}
+                  </span>
+                </div>
               </div>
-              <div>
-                <strong className="font-display font-bold block text-sky-900 text-base">
-                  Secretul științific al lui Magno:
-                </strong>
-                <span className="font-medium text-slate-700">
-                  {scene.keyTakeaway}
-                </span>
-              </div>
+              <ListenButton
+                id={`listen-takeaway-${scene.id}`}
+                text={`Secretul științific al lui Magno: ${scene.keyTakeaway}`}
+                size="sm"
+                variant="icon"
+                tooltip="Ascultă secretul științific"
+              />
             </div>
           </motion.div>
         </AnimatePresence>
